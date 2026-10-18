@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Credence · Credit Risk Assessment</title>
+  <meta name="description" content="Decision-support interface for a machine-learning credit-risk model: probability of default, tuned decision threshold, and transparent classification.">
+  <meta name="theme-color" content="#FAF8F4">
+  <meta name="color-scheme" content="light">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Spline+Sans+Mono:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="static/favicon.png">
+  <link rel="apple-touch-icon" href="static/favicon.png">
+  <link rel="stylesheet" href="static/styles.css">
+  <script src="static/app.js" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="wordmark" href="#top" aria-label="Credence — back to top">
+        <img class="wordmark-logo" src="static/logo-mark.png" alt="" width="40" height="40">
+        <span class="wordmark-text">
+          <span class="wordmark-name">Credence</span>
+          <span class="wordmark-sub">Credit risk intelligence</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#assessment">Assessment</a>
+        <a href="#explainability">Explainability</a>
+        <a href="static/attribution.html" data-open-attribution>Attribution</a>
+        <a href="#model">Model</a>
+      </nav>
+      <button class="status-chip" id="statusChip" type="button" data-state="checking"
+              title="Check inference service status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text" id="statusText">Checking service…</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section class="hero" id="top">
+      <div class="container">
+        <p class="eyebrow">Credit risk · decision support</p>
+        <h1>Put a number on&nbsp;credit&nbsp;risk.</h1>
+        <p class="hero-lede">
+          Credence submits an applicant&rsquo;s profile to the project&rsquo;s credit-risk
+          model and turns its response into a decision you can act on — a probability
+          of default, a tuned decision threshold, and a transparent classification.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#assessment">Run an assessment</a>
+          <a class="arrow-link" href="#model">How the model decides <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="scale-motif" aria-hidden="true">
+          <div class="motif-axis"></div>
+          <div class="motif-point" style="left: 26%">
+            <span class="motif-label">model score</span>
+            <span class="motif-stem"></span>
+            <span class="motif-dot"></span>
+          </div>
+          <div class="motif-point" style="left: 38%">
+            <span class="motif-label">decision threshold</span>
+            <span class="motif-dash"></span>
+          </div>
+        </div>
+        <p class="motif-caption mono">
+          Schematic — the decision rule applied at inference: probability of default against the tuned threshold.
+        </p>
+
+        <dl class="spec-strip">
+          <div class="spec-cell">
+            <dt class="spec-value">11</dt>
+            <dd class="spec-label">applicant features scored</dd>
+          </div>
+          <div class="spec-cell">
+            <dt class="spec-value">POST /predict</dt>
+            <dd class="spec-label">FastAPI inference endpoint</dd>
+          </div>
+          <div class="spec-cell">
+            <dt class="spec-value">0 – 1</dt>
+            <dd class="spec-label">probability-of-default scale</dd>
+          </div>
+          <div class="spec-cell">
+            <dt class="spec-value">PD ≥ threshold</dt>
+            <dd class="spec-label">classification rule at inference</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section" id="assessment">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">01 · Assessment</p>
+          <h2>The applicant assessment</h2>
+          <p class="section-lede">
+            Eleven fields, exactly as the model&rsquo;s request schema defines them.
+            The application is sent to the real inference API — nothing on this page
+            is simulated.
+          </p>
+        </header>
+
+        <form id="assessmentForm" class="form-wrap" novalidate autocomplete="off">
+          <div id="formGroups"></div>
+
+          <div class="form-actions">
+            <p class="form-note">
+              Sends the application to the inference service via
+              <code>POST /predict</code>. Nothing is stored.
+            </p>
+            <button class="btn btn-primary" id="submitBtn" type="submit" aria-busy="false">
+              <span id="submitLabel">Run risk assessment</span>
+            </button>
+          </div>
+          <p class="form-notice" id="formNotice" role="alert" hidden></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="result">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">02 · Outcome</p>
+          <h2>Risk outcome</h2>
+          <p class="section-lede">
+            Rendered directly from the model&rsquo;s response — the probability,
+            the classification, and how the score relates to the decision threshold.
+          </p>
+        </header>
+        <div id="resultRegion" aria-busy="false"></div>
+        <span class="visually-hidden" id="resultAnnouncer" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="section" id="explainability">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">03 · Explainability</p>
+          <h2>Why the model decided</h2>
+          <p class="section-lede">
+            What can be explained honestly today, and what is waiting on the
+            backend — clearly separated.
+          </p>
+        </header>
+
+        <div class="xpanels">
+          <article class="xpanel">
+            <header class="xpanel-head">
+              <h3>Decision context</h3>
+              <span class="tag tag-live">From the live response</span>
+            </header>
+            <div id="xDecision"></div>
+          </article>
+
+          <article class="xpanel">
+            <header class="xpanel-head">
+              <h3>Feature attribution</h3>
+              <span class="tag tag-pending">Awaiting API integration</span>
+            </header>
+            <p class="xpanel-body">
+              The credit-risk project includes SHAP-based explainability, but the
+              current API does not expose feature attributions — so this panel
+              deliberately shows no numbers. The moment the backend serves them,
+              this layout renders the real values: ranked risk-increasing and
+              risk-decreasing factors, their applicant values, and signed
+              contribution magnitudes.
+            </p>
+            <div class="x-skeleton" role="presentation" aria-label="Reserved for SHAP attribution rows">
+              <div class="x-skeleton-row x-skeleton-head">
+                <span>Factor</span><span>Applicant value</span><span>Contribution</span>
+              </div>
+              <div class="x-skeleton-row"><span>—</span><span>—</span><span>—</span></div>
+              <div class="x-skeleton-row"><span>—</span><span>—</span><span>—</span></div>
+              <div class="x-skeleton-row"><span>—</span><span>—</span><span>—</span></div>
+            </div>
+            <a class="btn btn-ghost attr-open" href="static/attribution.html" data-open-attribution>
+              Open full attribution analysis
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <details class="contract">
+              <summary>Proposed integration contract</summary>
+              <pre>POST /explain
+{
+  "shap_values": [
+    { "feature": "&lt;name&gt;", "value": "&lt;applicant value&gt;",
+      "contribution": "&lt;signed magnitude&gt;" }
+  ]
+}</pre>
+            </details>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="model">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">04 · Model &amp; system</p>
+          <h2>Under the hood</h2>
+          <p class="section-lede">
+            What the system actually is — every claim below is verifiable in the code.
+          </p>
+        </header>
+
+        <dl class="spec">
+          <div class="spec-row">
+            <dt>Inference model</dt>
+            <dd>A joblib-serialized scikit-learn pipeline (<code>credit_risk_model.pkl</code>) with preprocessing built in — it accepts the raw 11-field application record and returns class probabilities.</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Decision threshold</dt>
+            <dd>Persisted separately in <code>best_threshold.pkl</code> and applied at inference: probability ≥ threshold → default predicted. The value is returned with every response, so results are always auditable.</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Serving layer</dt>
+            <dd>FastAPI. The model and threshold load once inside the application lifespan and stay in memory; each <code>POST /predict</code> scores the request without re-reading the artifacts.</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Request contract</dt>
+            <dd>A Pydantic-validated body of 11 typed fields — 7 numeric, 4 categorical — matching the model&rsquo;s training schema.</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Response contract</dt>
+            <dd><code>default_probability</code> (0–1), <code>default_prediction</code> (0 or 1), <code>threshold</code> (float), and <code>Result</code> (&ldquo;High Risk&rdquo; or &ldquo;Low Risk&rdquo;).</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Explainability</dt>
+            <dd>Every assessment is explained live: a native SHAP TreeExplainer scores each of the model's five XGBoost members for that exact applicant, and the averaged, ranked contributions (log-odds) are served through <code>POST /explain</code>.</dd>
+          </div>
+        </dl>
+
+        <div class="features">
+          <p class="subsection-title">Model inputs</p>
+          <p class="features-intro">The exact schema accepted by the endpoint.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Feature</th><th>Type</th><th>Group</th><th>What it captures</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="fname">person_age</td><td>int</td><td>Applicant</td><td>Age in years</td></tr>
+                <tr><td class="fname">person_income</td><td>float</td><td>Applicant</td><td>Gross annual income</td></tr>
+                <tr><td class="fname">person_home_ownership</td><td>str</td><td>Applicant</td><td>Housing: mortgage / rent / own / other</td></tr>
+                <tr><td class="fname">person_emp_length</td><td>float</td><td>Applicant</td><td>Years in current employment</td></tr>
+                <tr><td class="fname">loan_intent</td><td>str</td><td>Loan</td><td>Stated purpose of the loan</td></tr>
+                <tr><td class="fname">loan_grade</td><td>str</td><td>Loan</td><td>Assigned credit grade, A–G</td></tr>
+                <tr><td class="fname">loan_amnt</td><td>float</td><td>Loan</td><td>Requested principal</td></tr>
+                <tr><td class="fname">loan_int_rate</td><td>float</td><td>Loan</td><td>Annual interest rate</td></tr>
+                <tr><td class="fname">loan_percent_income</td><td>float</td><td>Loan</td><td>Loan amount as a share of income</td></tr>
+                <tr><td class="fname">cb_person_default_on_file</td><td>str</td><td>Bureau</td><td>Historical default on the credit file</td></tr>
+                <tr><td class="fname">cb_person_cred_hist_length</td><td>int</td><td>Bureau</td><td>Years of recorded credit history</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <ol class="reading">
+          <li>
+            <span class="reading-index">1</span>
+            <span class="reading-title">Probability of default</span>
+            <span class="reading-text">The model&rsquo;s estimate that this applicant will default, on a 0–1 scale. It is a probability, not a verdict — 0.18 reads as an estimated 18% likelihood.</span>
+          </li>
+          <li>
+            <span class="reading-index">2</span>
+            <span class="reading-title">The decision threshold</span>
+            <span class="reading-text">The classification flips at the tuned cutoff: a score at or above the threshold is predicted to default and labelled high risk. The threshold travels with every response, so every result can be checked.</span>
+          </li>
+          <li>
+            <span class="reading-index">3</span>
+            <span class="reading-title">The scope</span>
+            <span class="reading-text">This is decision support, not underwriting. The model quantifies statistical risk; approving or declining a loan remains a human, policy-driven call.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-word">Credence</p>
+        <p class="footer-line">Credit-risk decision support. Every figure on this page is rendered from live model responses.</p>
+      </div>
+      <p class="footer-meta mono">POST /predict · 11 features · scikit-learn pipeline · served by FastAPI · <span id="year"></span></p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>

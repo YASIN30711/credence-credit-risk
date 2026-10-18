@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feature attribution · Credence</title>
+  <meta name="description" content="Full feature-attribution analysis for a Credence credit-risk assessment: bar chart, donut share, waterfall and scenario comparison of live SHAP values.">
+  <meta name="theme-color" content="#FAF8F4">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Spline+Sans+Mono:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="attribution.css">
+  <script src="attribution.js" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="wordmark" href="/" aria-label="Credence — back to the assessment">
+        <img class="wordmark-logo" src="logo-mark.png" alt="" width="40" height="40">
+        <span class="wordmark-text">
+          <span class="wordmark-name">Credence</span>
+          <span class="wordmark-sub">Credit risk intelligence</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/#assessment">Assessment</a>
+        <a href="/#explainability">Explainability</a>
+        <a href="attribution.html" aria-current="page">Attribution</a>
+        <a href="/#model">Model</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container attr-page">
+
+      <a class="back-link" href="/#explainability">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to the assessment
+      </a>
+
+      <header class="page-head">
+        <p class="eyebrow">Explainability · live SHAP</p>
+        <h1>Feature attribution</h1>
+        <p class="section-lede">
+          Which inputs pushed this applicant&rsquo;s risk score up, and which pulled it down.
+          Switch between views to read the same SHAP values as a bar chart, a share of
+          influence, a step-by-step waterfall, or side by side across scenarios.
+        </p>
+      </header>
+
+      <div id="attrApp" aria-busy="true">
+        <p class="attr-status">Loading attributions…</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-word">Credence</p>
+        <p class="footer-line">Credit-risk decision support. Every figure on this page is computed live by <code>POST /explain</code>.</p>
+      </div>
+      <p class="footer-meta mono">SHAP TreeExplainer · log-odds · averaged across model members</p>
+    </div>
+  </footer>
+
+  <div class="attr-tip" id="attrTip" role="tooltip" hidden></div>
+
+</body>
+</html>
