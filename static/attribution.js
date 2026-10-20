@@ -12,7 +12,7 @@ const EXPLAIN_URL = "/explain";
 const STORAGE_KEY = "credence.attribution.v1";
 const REQUEST_TIMEOUT_MS = 30000;
 
-const SCENARIO_COLORS = ["#1C1A15", "#2F5D8A", "#B7791F", "#7B4FA3", "#7A8794"];
+const SCENARIO_COLORS = ["#F4F1FA", "#38bdf8", "#f5b84b", "#c084fc", "#8A839C"];
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 /* ---------- field metadata (mirrors the main page's schema) ---------- */
@@ -635,6 +635,7 @@ function draw() {
   }
   root.setAttribute("aria-busy", "false");
   root.replaceChildren(...parts);
+  picker?.setIndex(Math.max(0, VIEWS.findIndex((v) => v.id === ui.view)));
   void ready;
 }
 
@@ -649,6 +650,71 @@ function errorBlock(message, error) {
   retry.addEventListener("click", boot);
   return el("div", { class: "chart-card empty-card" }, el("h3", null, message), el("p", null, hint), retry);
 }
+
+/* ---------- graph picker (CircularCarousel) & holo card ---------- */
+
+let picker = null;
+
+// Small illustrations of each chart type, drawn as inline SVG data-URIs.
+function thumb(body) {
+  const markup = `<svg xmlns="${SVG_NS}" viewBox="0 0 220 220"><rect width="220" height="220" fill="#14111A"/>` +
+    `<rect x="0" y="0" width="220" height="220" fill="#2a2038" opacity=".5"/>${body}</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;
+}
+
+const THUMBS = {
+  bar: () => {
+    const rows = [[-62, "#4ADE9B"], [78, "#FF6B8B"], [-34, "#4ADE9B"], [52, "#FF6B8B"], [-18, "#4ADE9B"], [26, "#FF6B8B"]];
+    return thumb('<line x1="110" y1="30" x2="110" y2="190" stroke="#4a4058" stroke-width="1.5"/>' +
+      rows.map(([w, c], i) => `<rect x="${w < 0 ? 110 + w : 110}" y="${38 + i * 25}" width="${Math.abs(w)}" height="14" rx="3" fill="${c}"/>`).join(""));
+  },
+  donut: () => {
+    const parts = [[0.34, "#FF6B8B"], [0.24, "#ff9db3"], [0.2, "#4ADE9B"], [0.13, "#8ff0c2"], [0.09, "#4a4058"]];
+    const r = 54, c = 2 * Math.PI * r;
+    let acc = 0;
+    return thumb(parts.map(([f, col]) => {
+      const seg = `<circle cx="110" cy="110" r="${r}" fill="none" stroke="${col}" stroke-width="30" stroke-dasharray="${(f * c - 2).toFixed(1)} ${(c).toFixed(1)}" stroke-dashoffset="${(-acc * c).toFixed(1)}" transform="rotate(-90 110 110)"/>`;
+      acc += f; return seg;
+    }).join(""));
+  },
+  waterfall: () => {
+    const steps = [[40, 62, "#F4F1FA"], [62, 88, "#FF6B8B"], [88, 74, "#4ADE9B"], [74, 112, "#FF6B8B"], [112, 96, "#4ADE9B"], [96, 96, "#F4F1FA", true]];
+    return thumb('<line x1="26" y1="170" x2="194" y2="170" stroke="#4a4058" stroke-width="1.5"/>' + steps.map(([a, b, c, total], i) => {
+      const top = total ? 170 - 96 : 170 - Math.max(a, b), h = total ? 96 : Math.abs(b - a);
+      return `<rect x="${30 + i * 28}" y="${top}" width="20" height="${Math.max(h, 4)}" rx="2.5" fill="${c}"/>`;
+    }).join(""));
+  },
+  compare: () => {
+    const groups = [[48, -30, 20], [-40, 36, -14], [30, 14, -34], [-22, -10, 44]];
+    return thumb('<line x1="110" y1="30" x2="110" y2="190" stroke="#4a4058" stroke-width="1.5"/>' + groups.map((g, i) =>
+      g.map((w, j) => `<rect x="${w < 0 ? 110 + w : 110}" y="${36 + i * 38 + j * 10}" width="${Math.abs(w)}" height="8" rx="2" fill="${SCENARIO_COLORS[j]}"/>`).join("")).join(""));
+  },
+};
+
+const PICKER_ITEMS = [
+  { id: "bar", title: "Bar chart", subtitle: "Ranked drivers", alt: "Diverging bars pulling risk up and down around a centre line" },
+  { id: "donut", title: "Donut", subtitle: "Share of influence", alt: "Donut chart splitting total influence between features" },
+  { id: "waterfall", title: "Waterfall", subtitle: "Step by step", alt: "Waterfall of contributions stepping from base value to model output" },
+  { id: "compare", title: "Compare", subtitle: "Across scenarios", alt: "Grouped bars comparing scenarios side by side" },
+].map((item) => ({ ...item, src: THUMBS[item.id]() }));
+
+function mountPicker() {
+  const section = document.getElementById("graphPicker");
+  const stage = document.getElementById("pickerStage");
+  if (!section || !stage || !window.CredenceUI) return;
+  section.hidden = false;
+  picker = window.CredenceUI.circularCarousel(stage, {
+    items: PICKER_ITEMS, preset: "cylinder", intro: "rise", cardWidth: 220, aspectRatio: 1, speed: 14, captions: true,
+    label: "Graph type", selected: Math.max(0, VIEWS.findIndex((v) => v.id === ui.view)),
+    onSelect: (item) => { ui.view = item.id; history.replaceState(null, "", `#${item.id}`); draw(); },
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.CredenceUI?.holoCard(document.getElementById("holoSlot"), {
+    image: "logo-mark.png", alt: "Credence", preset: "bursts",
+  });
+});
 
 /* ---------- boot ---------- */
 
@@ -675,6 +741,7 @@ async function boot() {
     catch (error) { scenario.explain = null; scenario.error = error; console.error("[Credence] /explain failed:", error); }
   }));
   ui.scenario = Math.min(ui.scenario, scenarios.length - 1);
+  mountPicker();
   draw();
 }
 

@@ -5,15 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Credence · Credit Risk Assessment</title>
   <meta name="description" content="Decision-support interface for a machine-learning credit-risk model: probability of default, tuned decision threshold, and transparent classification.">
-  <meta name="theme-color" content="#FAF8F4">
-  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="color-scheme" content="dark">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Spline+Sans+Mono:wght@400..700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="static/favicon.png">
   <link rel="apple-touch-icon" href="static/favicon.png">
   <link rel="stylesheet" href="static/styles.css">
+  <link rel="stylesheet" href="static/neon.css">
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js" defer></script>
   <script src="static/app.js" defer></script>
+  <script src="static/neon.js" defer></script>
 </head>
 <body>
 
@@ -46,6 +49,10 @@
 
     <section class="hero" id="top">
       <div class="container">
+        <div class="electric" id="electricLogo" role="img" aria-label="Credence logo">
+          <canvas aria-hidden="true"></canvas>
+          <img src="static/logo-mark.png" alt="" width="360" height="360">
+        </div>
         <p class="eyebrow">Credit risk · decision support</p>
         <h1>Put a number on&nbsp;credit&nbsp;risk.</h1>
         <p class="hero-lede">
@@ -74,24 +81,62 @@
           Schematic — the decision rule applied at inference: probability of default against the tuned threshold.
         </p>
 
-        <dl class="spec-strip">
-          <div class="spec-cell">
-            <dt class="spec-value">11</dt>
-            <dd class="spec-label">applicant features scored</dd>
-          </div>
-          <div class="spec-cell">
-            <dt class="spec-value">POST /predict</dt>
-            <dd class="spec-label">FastAPI inference endpoint</dd>
-          </div>
-          <div class="spec-cell">
-            <dt class="spec-value">0 – 1</dt>
-            <dd class="spec-label">probability-of-default scale</dd>
-          </div>
-          <div class="spec-cell">
-            <dt class="spec-value">PD ≥ threshold</dt>
-            <dd class="spec-label">classification rule at inference</dd>
-          </div>
-        </dl>
+      </div>
+    </section>
+
+    <section class="section bento" id="overview">
+      <div class="vault-bg" id="vaultBg" aria-hidden="true"><canvas></canvas></div>
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">At a glance</p>
+          <h2>Everything the model gives you</h2>
+          <p class="section-lede">Hover the cards, click them, and watch the light follow you.</p>
+        </header>
+
+        <div class="bento-grid" id="bentoGrid">
+          <article class="bento-card span-2x2">
+            <div>
+              <p class="bento-eyebrow">Core output</p>
+              <h3 class="bento-title">A probability, not a verdict</h3>
+            </div>
+            <div class="bento-scale" aria-hidden="true">
+              <div class="bento-scale-bar"></div>
+              <div class="bento-scale-pin is-score" style="left: 26%">model score</div>
+              <div class="bento-scale-pin is-threshold" style="left: 38%">threshold</div>
+            </div>
+            <p class="bento-text">The model returns a probability of default between 0 and 1. A tuned threshold turns it into a clear, auditable classification.</p>
+          </article>
+
+          <article class="bento-card">
+            <p class="bento-eyebrow">Inputs</p>
+            <div><p class="bento-value">11</p><p class="bento-text">applicant features scored</p></div>
+          </article>
+
+          <article class="bento-card">
+            <p class="bento-eyebrow">Endpoint</p>
+            <div><p class="bento-value is-mono">POST /predict</p><p class="bento-text">FastAPI inference endpoint</p></div>
+          </article>
+
+          <article class="bento-card span-2x1">
+            <p class="bento-eyebrow">Explainability</p>
+            <div><h3 class="bento-title">Live SHAP explanations</h3><p class="bento-text">Every assessment is explained per feature with a native TreeExplainer across the model&rsquo;s five XGBoost members.</p></div>
+          </article>
+
+          <article class="bento-card">
+            <p class="bento-eyebrow">Scale</p>
+            <div><p class="bento-value">0 – 1</p><p class="bento-text">probability-of-default scale</p></div>
+          </article>
+
+          <article class="bento-card">
+            <p class="bento-eyebrow">Rule</p>
+            <div><p class="bento-value is-mono">PD ≥ threshold</p><p class="bento-text">classification rule at inference</p></div>
+          </article>
+
+          <article class="bento-card span-2x1">
+            <p class="bento-eyebrow">Transparency</p>
+            <div><h3 class="bento-title">A tuned, visible threshold</h3><p class="bento-text">Stored separately and returned with every response, so each result can be checked.</p></div>
+          </article>
+        </div>
       </div>
     </section>
 

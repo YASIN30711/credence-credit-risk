@@ -242,3 +242,220 @@
   .stat-value { font-size: 18px; }
   .stat-hint { font-size: 10.5px; }
 }
+
+
+/* ============================================================
+   NEW — UI kit styles
+   AnimatedContent · HoloCard · CircularCarousel · chart polish
+   (kept at the bottom so they override the rules above)
+   ============================================================ */
+
+/* ---------- AnimatedContent ----------
+   Children start hidden only when the page opted in (class set in <head>);
+   a CSS fail-safe reveals them if the script never runs. */
+.ui-anim [data-animate]:not([data-animate-ready]) > * {
+  opacity: 0;
+  animation: ui-failsafe 0.01s 2.5s forwards;
+}
+@keyframes ui-failsafe { to { opacity: 1; } }
+
+/* ---------- page head with holo card ---------- */
+
+.page-head.has-holo {
+  display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 20px 48px; align-items: center;
+}
+.page-head-copy { min-width: 0; }
+.holo-slot { justify-self: end; width: 190px; perspective: 900px; }
+
+/* ---------- HoloCard ---------- */
+
+.holo {
+  --px: 50%; --py: 50%; --rx: 0deg; --ry: 0deg; --bx: 50%; --by: 50%; --hyp: 0;
+  position: relative; display: block; aspect-ratio: 1 / 1; border-radius: 18px; outline: none;
+  touch-action: pan-y; cursor: grab; isolation: isolate;
+  transition: transform 0.5s cubic-bezier(.2,.7,.2,1);
+}
+.holo:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.holo__rotator {
+  position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
+  background: radial-gradient(120% 120% at 30% 20%, #FFFDF9, #E9E3D3 80%);
+  border: 1px solid var(--hairline-strong);
+  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 18px 36px -12px rgba(28, 26, 21, 0.45), 0 4px 10px rgba(28, 26, 21, 0.18);
+  transform: rotateY(var(--rx)) rotateX(var(--ry));
+  transition: transform 0.5s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s;
+  transform-style: preserve-3d;
+  animation: holo-idle 7s ease-in-out infinite;
+}
+.holo.is-active .holo__rotator {
+  transition: transform 0.08s linear, box-shadow 0.4s; animation: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 28px 48px -14px rgba(28, 26, 21, 0.55), 0 6px 14px rgba(28, 26, 21, 0.22);
+}
+.holo.is-active { cursor: grabbing; }
+@keyframes holo-idle {
+  0%, 100% { transform: rotateY(-5deg) rotateX(3deg); }
+  50%      { transform: rotateY(5deg) rotateX(-3deg); }
+}
+.holo__img {
+  position: absolute; inset: 14%; width: 72%; height: 72%; object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(28, 26, 21, 0.25)); pointer-events: none; user-select: none;
+}
+
+.holo__shine, .holo__glare { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+
+/* foil — preset "bursts": repeating conic starburst that slides with the pointer */
+.holo__shine {
+  mix-blend-mode: soft-light; opacity: 0.55; filter: saturate(1.1);
+  background-size: 220% 220%, 100% 100%;
+  background-position: var(--bx) var(--by), center;
+  transition: opacity 0.4s;
+}
+.holo[data-preset="bursts"] .holo__shine {
+  background-image:
+    repeating-conic-gradient(from 0deg at 50% 50%,
+      hsl(160 90% 62%) 0deg, hsl(200 95% 66%) 14deg, hsl(285 85% 70%) 28deg,
+      hsl(335 90% 68%) 42deg, hsl(45 95% 66%) 56deg, hsl(160 90% 62%) 70deg),
+    radial-gradient(circle at var(--px) var(--py), rgba(255,255,255,.55), transparent 55%);
+}
+.holo[data-preset="rainbow"] .holo__shine {
+  background-image:
+    repeating-linear-gradient(115deg, hsl(0 90% 65%), hsl(60 90% 65%) 12%, hsl(130 80% 62%) 24%,
+      hsl(200 90% 66%) 36%, hsl(280 85% 70%) 48%, hsl(0 90% 65%) 60%),
+    radial-gradient(circle at var(--px) var(--py), rgba(255,255,255,.5), transparent 55%);
+}
+.holo[data-preset="glitter"] .holo__shine {
+  background-image:
+    radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 85%, #fff 0 1px, transparent 2px),
+    repeating-linear-gradient(120deg, hsl(170 80% 60%), hsl(260 80% 70%) 20%, hsl(330 85% 68%) 40%, hsl(170 80% 60%) 60%);
+  background-size: 28px 28px, 34px 34px, 41px 41px, 220% 220%;
+}
+.holo.is-active .holo__shine { opacity: 1; mix-blend-mode: overlay; }
+
+/* soft light that follows the pointer */
+.holo__glare {
+  background: radial-gradient(farthest-corner circle at var(--px) var(--py),
+    rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 38%, transparent 70%);
+  mix-blend-mode: overlay; opacity: 0.35; transition: opacity 0.4s;
+}
+.holo.is-active .holo__glare { opacity: calc(0.55 + var(--hyp) * 0.3); }
+
+/* ---------- CircularCarousel ---------- */
+
+.picker { margin: 0 0 34px; }
+.picker[hidden] { display: none; }
+.picker-head { margin-bottom: 6px; }
+.picker-head h2 { font: 400 clamp(26px, 3.4vw, 34px) / 1.1 var(--font-serif); letter-spacing: -0.01em; margin: 0 0 6px; }
+.picker-head p { color: var(--ink-2); max-width: 58ch; }
+.picker-stage { width: 100%; height: 340px; position: relative; }
+
+.cc {
+  position: absolute; inset: 0; perspective: 1300px; perspective-origin: 50% 38%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+}
+.cc.is-dragging { cursor: grabbing; }
+.cc__ring {
+  position: relative; width: var(--cc-w); height: var(--cc-h); transform-style: preserve-3d;
+  margin-top: -34px; /* leave room for the caption under the front card */
+}
+.cc__slot { position: absolute; inset: 0; transform-style: preserve-3d; }
+
+.cc__card {
+  all: unset; box-sizing: border-box; position: relative; display: block; width: 100%; height: 100%;
+  border-radius: 16px; cursor: pointer; backface-visibility: hidden;
+  background: var(--field-bg); border: 1px solid var(--hairline-strong);
+  box-shadow: 0 14px 30px -14px rgba(28, 26, 21, 0.4), 0 2px 6px rgba(28, 26, 21, 0.08);
+  opacity: var(--vis, 1);
+  filter: saturate(calc(0.35 + var(--front, 1) * 0.65));
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.cc__card img { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; display: block; pointer-events: none; }
+.cc__card:hover { border-color: var(--ink-3); }
+.cc__card.is-selected {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--ink), 0 26px 44px -18px rgba(28, 26, 21, 0.55);
+}
+.cc__card:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* shine sweep across the selected card */
+.cc__card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.7) 50%, transparent 65%);
+  background-size: 250% 100%; background-position: 150% 0;
+}
+.cc__card.is-selected::after { opacity: 1; animation: cc-sheen 2.8s 0.4s ease-in-out infinite; }
+@keyframes cc-sheen { 0%, 55% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
+
+.cc__cap {
+  position: absolute; left: 0; right: 0; top: calc(100% + 12px); display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 1px; opacity: calc(var(--front, 1) * var(--front, 1)); pointer-events: none;
+  transition: opacity 0.2s;
+}
+.cc__cap strong { font: 400 22px/1.1 var(--font-serif); color: var(--ink); }
+.cc__cap small { font: 600 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+/* intro: "rise" — cards float up into place, staggered */
+.cc.intro-rise .cc__card, .cc.intro-spin .cc__card {
+  transform: translateY(70px) scale(0.92); opacity: 0;
+}
+.cc.intro-rise.is-in .cc__card, .cc.intro-spin.is-in .cc__card {
+  transform: none; opacity: var(--vis, 1);
+  transition: transform 0.9s cubic-bezier(.16,1,.3,1) var(--d, 0ms), opacity 0.7s ease var(--d, 0ms), box-shadow 0.25s, border-color 0.25s;
+}
+
+/* preset "ring": flatter ring, lighter tilt */
+.cc[data-preset="ring"] { perspective: 1700px; }
+
+/* ---------- chart polish: shine + staggered bars ---------- */
+
+.bc-bar, .cmp-bar { overflow: hidden; }
+.bc-bar::after, .cmp-bar::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  background-size: 260% 100%; background-position: 160% 0;
+  animation: bar-shine 1.1s 0.5s cubic-bezier(.3,.6,.2,1) both;
+}
+.bc-bar::before, .cmp-bar::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.22), transparent 55%);
+}
+@keyframes bar-shine { from { background-position: 160% 0; } to { background-position: -60% 0; } }
+@keyframes bar-shine-hover { from { background-position: 160% 0; } to { background-position: -60% 0; } }
+.bc-row:hover .bc-bar::after, .bc-row:focus-visible .bc-bar::after { animation: bar-shine-hover 0.9s ease-out both; }
+
+/* ease the bars in one after another */
+.bc-row:nth-child(1) .bc-bar { animation-delay: 0.00s; } .bc-row:nth-child(1) .bc-bar::after { animation-delay: 0.50s; }
+.bc-row:nth-child(2) .bc-bar { animation-delay: 0.06s; } .bc-row:nth-child(2) .bc-bar::after { animation-delay: 0.56s; }
+.bc-row:nth-child(3) .bc-bar { animation-delay: 0.12s; } .bc-row:nth-child(3) .bc-bar::after { animation-delay: 0.62s; }
+.bc-row:nth-child(4) .bc-bar { animation-delay: 0.18s; } .bc-row:nth-child(4) .bc-bar::after { animation-delay: 0.68s; }
+.bc-row:nth-child(5) .bc-bar { animation-delay: 0.24s; } .bc-row:nth-child(5) .bc-bar::after { animation-delay: 0.74s; }
+.bc-row:nth-child(6) .bc-bar { animation-delay: 0.30s; } .bc-row:nth-child(6) .bc-bar::after { animation-delay: 0.80s; }
+.bc-row:nth-child(7) .bc-bar { animation-delay: 0.36s; } .bc-row:nth-child(7) .bc-bar::after { animation-delay: 0.86s; }
+.bc-row:nth-child(n+8) .bc-bar { animation-delay: 0.42s; } .bc-row:nth-child(n+8) .bc-bar::after { animation-delay: 0.92s; }
+.cmp-row:nth-child(2) .cmp-bar { animation-delay: 0.06s; }
+.cmp-row:nth-child(3) .cmp-bar { animation-delay: 0.12s; }
+.cmp-row:nth-child(4) .cmp-bar { animation-delay: 0.18s; }
+.cmp-row:nth-child(5) .cmp-bar { animation-delay: 0.24s; }
+.cmp-row:nth-child(n+6) .cmp-bar { animation-delay: 0.3s; }
+
+/* fluid hand-off when the chart view changes */
+#attrApp .summary, #attrApp .chart-card {
+  animation: view-in 0.5s cubic-bezier(.16,1,.3,1) both;
+}
+#attrApp .chart-card { animation-delay: 0.06s; }
+@keyframes view-in { from { opacity: 0; transform: translateY(14px); } }
+
+/* ---------- UI kit responsive ---------- */
+
+@media (max-width: 760px) {
+  .page-head.has-holo { grid-template-columns: 1fr; }
+  .holo-slot { justify-self: start; width: 140px; order: -1; }
+  .picker-stage { height: 320px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo__rotator { animation: none; }
+  .cc__card.is-selected::after, .bc-bar::after, .cmp-bar::after { animation: none; }
+  #attrApp .summary, #attrApp .chart-card { animation: none; }
+}

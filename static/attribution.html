@@ -5,15 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Feature attribution · Credence</title>
   <meta name="description" content="Full feature-attribution analysis for a Credence credit-risk assessment: bar chart, donut share, waterfall and scenario comparison of live SHAP values.">
-  <meta name="theme-color" content="#FAF8F4">
-  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="color-scheme" content="dark">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Spline+Sans+Mono:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="attribution.css">
+  <link rel="stylesheet" href="ui-kit.css">
+  <link rel="stylesheet" href="neon.css">
+  <script>if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("ui-anim");</script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js" defer></script>
+  <script src="ui-kit.js" defer></script>
   <script src="attribution.js" defer></script>
+  <script src="neon.js" defer></script>
 </head>
 <body>
 
@@ -45,15 +51,26 @@
         Back to the assessment
       </a>
 
-      <header class="page-head">
-        <p class="eyebrow">Explainability · live SHAP</p>
-        <h1>Feature attribution</h1>
-        <p class="section-lede">
-          Which inputs pushed this applicant&rsquo;s risk score up, and which pulled it down.
-          Switch between views to read the same SHAP values as a bar chart, a share of
-          influence, a step-by-step waterfall, or side by side across scenarios.
-        </p>
+      <header class="page-head has-holo">
+        <div class="page-head-copy" data-animate data-distance="100" data-direction="vertical" data-duration="0.8" data-ease="power3.out" data-blur="0" data-stagger="0.08" data-threshold="0.1">
+          <p class="eyebrow">Explainability · live SHAP</p>
+          <h1>Feature attribution</h1>
+          <p class="section-lede">
+            Which inputs pushed this applicant&rsquo;s risk score up, and which pulled it down.
+            Switch between views to read the same SHAP values as a bar chart, a share of
+            influence, a step-by-step waterfall, or side by side across scenarios.
+          </p>
+        </div>
+        <div class="holo-slot" id="holoSlot"></div>
       </header>
+
+      <section class="picker" id="graphPicker" aria-labelledby="pickerTitle" hidden>
+        <div class="picker-head" data-animate data-distance="100" data-direction="vertical" data-duration="0.8" data-ease="power3.out" data-blur="0" data-stagger="0.08" data-threshold="0.1">
+          <h2 id="pickerTitle">Choose your view</h2>
+          <p>Select a graph type below to get started.</p>
+        </div>
+        <div class="picker-stage" id="pickerStage"></div>
+      </section>
 
       <div id="attrApp" aria-busy="true">
         <p class="attr-status">Loading attributions…</p>
